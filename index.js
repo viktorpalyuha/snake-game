@@ -168,6 +168,7 @@ class Apple {
     let randomRow = Math.floor(Math.random() * (heightInBlocks - 2)) + 1;
     if(snake.segments.filter(segment => segment === this.position).length !== 0) {
       this.move();
+      return;
     }
 
     this.position = new Block(randomCol, randomRow);
