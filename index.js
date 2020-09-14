@@ -6,6 +6,8 @@ let blockSize = 10;
 let widthInBlocks = width / blockSize;
 let heightInBlocks = height / blockSize;
 let score = 0;
+let animationTime = 100;
+let stopGame = false;
 
 function drawBorder() {
   ctx.fillStyle = "Gray";
@@ -33,7 +35,7 @@ function circle(x, y, radius, fillCircle) {
 }
 
 function gameOver() {
-  clearInterval(intervalId);
+  stopGame = true;
   ctx.font = "60px Courier";
   ctx.fillStyle = "Black";
   ctx.textAlign = "center";
@@ -74,7 +76,13 @@ class Snake {
   }
 
   draw() {
-    this.segments.map((segment) => segment.drawSquare("Blue"));
+    this.segments.map((segment, i) =>
+      i === 0
+        ? segment.drawSquare("Green")
+        : i % 2 !== 0
+        ? segment.drawSquare("Blue")
+        : segment.drawSquare("Yellow")
+    );
   }
 
   move() {
@@ -102,6 +110,9 @@ class Snake {
 
     if (newHead.equal(apple.position)) {
       score++;
+      if(animationTime !== 1) {
+        animationTime--;
+      }
       apple.move();
     } else {
       this.segments.pop();
@@ -155,6 +166,10 @@ class Apple {
   move() {
     let randomCol = Math.floor(Math.random() * (widthInBlocks - 2)) + 1;
     let randomRow = Math.floor(Math.random() * (heightInBlocks - 2)) + 1;
+    if(snake.segments.filter(segment => segment === this.position).length !== 0) {
+      this.move();
+    }
+
     this.position = new Block(randomCol, randomRow);
   }
 }
@@ -176,11 +191,18 @@ document.querySelector("body").addEventListener("keydown", (event) => {
   }
 });
 
-let intervalId = setInterval(() => {
+function gameLoop() {
+  if(stopGame) return;
+
   ctx.clearRect(0, 0, height, width);
   drawScore();
   snake.move();
   snake.draw();
   apple.draw();
   drawBorder();
-}, 70);
+
+  setTimeout(gameLoop, animationTime);
+
+}
+
+gameLoop();
